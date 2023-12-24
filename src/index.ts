@@ -5,21 +5,16 @@ export interface Env {
 }
 
 export default {
-	async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
+	fetch: async (request: Request, env: Env, ctx: ExecutionContext): Promise<Response> => {
 		const ai = new Ai(env.AI);
 		const searchparams = new URL(request.url).searchParams;
 		const q = searchparams.get('q');
 		const content = q;
 		let chat = {
-			messages: [
-				{
-					role: 'user',
-					content: content,
-				},
-			],
+			prompt: `<s> you are a friendly assistant. </s>\n [INST] ${content} [/INST]`,
 			stream: true,
 		};
-		const stream = await ai.run('@cf/meta/llama-2-7b-chat-fp16', chat);
+		const stream = await ai.run('@hf/thebloke/orca-2-13b-awq', chat);
 		return new Response(stream, {
 			headers: {
 				'Access-Control-Allow-Origin': '*',
